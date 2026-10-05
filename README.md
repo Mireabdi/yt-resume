@@ -2,6 +2,14 @@
 
 A small Chrome extension that remembers where you left off in YouTube videos and resumes from there.
 
+## Screenshots
+
+| Light | Dark |
+| --- | --- |
+| ![Popup in light mode](docs/popup-light.png) | ![Popup in dark mode](docs/popup-dark.png) |
+
+The popup follows your system theme. Screenshots use sample data.
+
 <!-- TODO: add demo GIF here, e.g. ![YT Resume demo](docs/demo.gif) -->
 *Demo GIF coming soon.*
 
@@ -11,7 +19,7 @@ A small Chrome extension that remembers where you left off in YouTube videos and
 - Waits out pre-roll ads before resuming.
 - A small "Resumed at 1:57" toast in the player's bottom-left for 6 s, with a **Start over** button that jumps to 0:00 and forgets the saved position.
 - Resumes a few seconds early (default 3 s, configurable) so you catch the context.
-- Popup with saved videos (thumbnail, title, channel, position, progress bar), title search, and delete or clear all.
+- Popup with saved videos (thumbnail, title, channel, progress bar, time left), title search, and delete or clear all. Light and dark follow your system theme.
 - Playlist aware: videos watched in a playlist reopen in it.
 - Options page for the on/off switch, minimum video length, finished threshold and max stored videos.
 - Skips short videos and live streams, and forgets videos you finish.

@@ -10,6 +10,7 @@
   const RESUME_RECHECK_MS = 2500; // fallback check this long after playback starts
   const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
   const TOAST_MS = 6000;
+  const TOAST_FADE_MS = 150; // matches the CSS fade; the "--out" class goes on this long before removal
 
   let session = null; // state for the video currently being tracked
   let lastKnown = null; // {id, list, time, title, channel, duration}; used when the URL has already changed
@@ -120,6 +121,7 @@
   function hideToast() {
     if (!toast) return;
     clearTimeout(toast.timer);
+    clearTimeout(toast.fadeTimer);
     toast.el.remove();
     toast = null;
   }
@@ -156,7 +158,11 @@
       }
       el.append(text, btn);
       player.append(el);
-      toast = { el, timer: setTimeout(hideToast, TOAST_MS) };
+      toast = {
+        el,
+        timer: setTimeout(hideToast, TOAST_MS),
+        fadeTimer: setTimeout(() => el.classList.add('ytr-toast--out'), TOAST_MS - TOAST_FADE_MS),
+      };
     } catch { /* the toast is a nicety; never break resuming over it */ }
   }
 

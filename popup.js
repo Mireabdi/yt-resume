@@ -17,6 +17,16 @@ function formatTime(total) {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 }
 
+function formatLeft(entry) {
+  const sec = Math.max(0, entry.duration - entry.time);
+  if (sec < 60) return 'Less than 1 min left';
+  const m = Math.round(sec / 60);
+  if (m < 60) return `${m} min left`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h} h ${r} min left` : `${h} h left`;
+}
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -56,12 +66,16 @@ function renderRow([key, entry]) {
   const text = el('span', 'text');
   text.append(el('span', 'title', title));
   if (entry.channel) text.append(el('span', 'channel', String(entry.channel)));
-  text.append(el('span', 'meta', `${formatTime(entry.time)} / ${formatTime(entry.duration)}`));
   const bar = el('div', 'bar');
   const fill = el('div', 'fill');
   fill.style.width = `${pct}%`;
   bar.append(fill);
-  text.append(bar);
+  const foot = el('span', 'foot');
+  foot.append(
+    el('span', 'meta', `${formatTime(entry.time)} / ${formatTime(entry.duration)}`),
+    el('span', 'left', formatLeft(entry))
+  );
+  text.append(bar, foot);
   open.append(renderThumb(id), text);
   open.addEventListener('click', () => {
     chrome.tabs.create({ url: watchUrl(id, entry) });
@@ -104,6 +118,10 @@ async function load() {
 }
 
 searchEl.addEventListener('input', render);
+
+document.getElementById('open-options').addEventListener('click', () => {
+  chrome.runtime.openOptionsPage();
+});
 
 clearBtn.addEventListener('click', async () => {
   const all = await chrome.storage.local.get(null);

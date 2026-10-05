@@ -1,39 +1,66 @@
 /* Resume toast. Everything is prefixed "ytr-" to stay clear of YouTube's own classes. */
 .ytr-toast {
+  --ytr-bg: rgba(20, 20, 22, 0.88);
+  --ytr-fg: #f4f4f6;
+  --ytr-accent: #8b97ff;
+  --ytr-accent-hover: rgba(139, 151, 255, 0.16);
+  --ytr-shadow: rgba(0, 0, 0, 0.35);
   position: absolute;
   left: 12px;
   bottom: 64px;
   z-index: 1000;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(28, 28, 30, 0.92);
-  color: #fff;
-  font: 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  gap: 4px;
+  padding: 4px 6px 4px 14px;
+  border-radius: 999px;
+  /* Opaque enough that text stays readable over a bright frame (checked at 4.5:1 or better). */
+  background: var(--ytr-bg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--ytr-fg);
+  font: 12px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 2px 8px var(--ytr-shadow);
   pointer-events: auto;
+  opacity: 1;
+  transition: opacity 150ms ease;
+  animation: ytr-fade-in 150ms ease-out;
 }
+
+/* Added by the script 150 ms before the toast is removed. */
+.ytr-toast--out { opacity: 0; }
 
 .ytr-toast__btn {
   margin: 0;
-  padding: 2px 6px;
+  padding: 4px 10px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 999px;
   background: transparent;
-  color: #8ab4f8;
+  color: var(--ytr-accent);
   font: inherit;
   font-weight: 600;
-  text-decoration: underline;
   cursor: pointer;
+  transition: background-color 120ms ease;
 }
 
-.ytr-toast__btn:hover { background: rgba(255, 255, 255, 0.12); }
+.ytr-toast__btn:hover {
+  background: var(--ytr-accent-hover);
+  text-decoration: underline;
+}
 
 .ytr-toast__btn:focus-visible {
-  outline: 2px solid #8ab4f8;
+  outline: 2px solid var(--ytr-accent);
   outline-offset: 1px;
+}
+
+@keyframes ytr-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ytr-toast,
+  .ytr-toast__btn { animation: none; transition: none; }
 }
 
 /* Never show over an ad, even for the instant before the script notices. */

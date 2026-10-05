@@ -8,47 +8,61 @@
 </head>
 <body>
   <main>
-    <h1>YT Resume options</h1>
+    <h1>YT Resume</h1>
+    <p class="lead">Changes save automatically and apply to open YouTube tabs right away.</p>
 
-    <label class="row toggle">
-      <input id="enabled" type="checkbox">
-      <span>
-        <span class="label">Enabled</span>
-        <span class="hint">When off, nothing is saved and nothing is resumed. Saved videos are kept.</span>
-      </span>
-    </label>
+    <section class="group">
+      <h2>General</h2>
+      <div class="card">
+        <label class="row">
+          <span class="copy">
+            <span class="label">Enabled</span>
+            <span class="hint">When off, nothing is saved or resumed. Saved videos are kept.</span>
+          </span>
+          <input id="enabled" class="switch" type="checkbox" role="switch">
+        </label>
+      </div>
+    </section>
 
-    <label class="row">
-      <span>
-        <span class="label">Minimum video length (seconds)</span>
-        <span class="hint">Videos shorter than this are not tracked. Default 60.</span>
-      </span>
-      <input id="minDuration" type="number" inputmode="numeric" step="1">
-    </label>
+    <section class="group">
+      <h2>Tracking</h2>
+      <div class="card">
+        <label class="row">
+          <span class="copy">
+            <span class="label">Minimum video length</span>
+            <span class="hint">Videos shorter than this many seconds are not tracked. Default 60.</span>
+          </span>
+          <input id="minDuration" type="number" inputmode="numeric" step="1">
+        </label>
+        <label class="row">
+          <span class="copy">
+            <span class="label">Finished threshold</span>
+            <span class="hint">A video this many seconds from its end counts as finished and is forgotten. Default 15.</span>
+          </span>
+          <input id="finishedThreshold" type="number" inputmode="numeric" step="1">
+        </label>
+        <label class="row">
+          <span class="copy">
+            <span class="label">Maximum stored videos</span>
+            <span class="hint">The oldest entries are dropped beyond this. Default 500.</span>
+          </span>
+          <input id="maxEntries" type="number" inputmode="numeric" step="1">
+        </label>
+      </div>
+    </section>
 
-    <label class="row">
-      <span>
-        <span class="label">Finished threshold (seconds)</span>
-        <span class="hint">A video this close to its end counts as finished and is forgotten. Default 15.</span>
-      </span>
-      <input id="finishedThreshold" type="number" inputmode="numeric" step="1">
-    </label>
-
-    <label class="row">
-      <span>
-        <span class="label">Maximum stored videos</span>
-        <span class="hint">The oldest entries are dropped beyond this. Default 500.</span>
-      </span>
-      <input id="maxEntries" type="number" inputmode="numeric" step="1">
-    </label>
-
-    <label class="row">
-      <span>
-        <span class="label">Rewind on resume (seconds)</span>
-        <span class="hint">Resume this many seconds before where you stopped, to catch up on context. 0 to 30. Default 3.</span>
-      </span>
-      <input id="rewind" type="number" inputmode="numeric" step="1">
-    </label>
+    <section class="group">
+      <h2>Playback</h2>
+      <div class="card">
+        <label class="row">
+          <span class="copy">
+            <span class="label">Rewind on resume</span>
+            <span class="hint">Resume this many seconds before where you stopped, to catch up on context. 0 to 30. Default 3.</span>
+          </span>
+          <input id="rewind" type="number" inputmode="numeric" step="1">
+        </label>
+      </div>
+    </section>
 
     <div class="actions">
       <button id="reset" type="button">Reset to defaults</button>
