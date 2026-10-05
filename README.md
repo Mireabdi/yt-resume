@@ -11,7 +11,7 @@ A small Chrome extension that remembers where you left off in YouTube videos and
 The popup follows your system theme. Screenshots use sample data.
 
 <!-- TODO: add demo GIF here, e.g. ![YT Resume demo](docs/demo.gif) -->
-*Demo GIF coming soon.*
+
 
 ## Features
 
