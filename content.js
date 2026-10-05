@@ -5,7 +5,9 @@
   const KEY_PREFIX = 'v:';
   const SAVE_INTERVAL_MS = 5000;
   const MIN_RESUME_S = 10; // saved positions at or below this are not worth resuming
-  const USER_MOVED_S = 5; // playhead beyond this at resume time means someone already moved it
+  const USER_MOVED_S = 5; // after an ad, a playhead beyond this means someone already moved it
+  const RESUME_TOLERANCE_S = 5; // playhead this close to our target already counts as resumed
+  const RESUME_RECHECK_MS = 2500; // fallback check this long after playback starts
   const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
   const TOAST_MS = 6000;
 
@@ -161,14 +163,19 @@
   // ---- resuming ----
   function stopResume(s) {
     s.resumed = true;
+    clearTimeout(s.timer);
+    s.timer = null;
     if (s.observer) {
       s.observer.disconnect();
       s.observer = null;
     }
   }
 
-  // Resume only once the real video is loaded, and never over a position the user already moved.
-  function maybeResume(s) {
+  // One check per video load. At load time YouTube may already have resumed from its own history,
+  // so we compare the playhead with our target instead of assuming it starts at 0:00 and only
+  // seek when they disagree. `guarded` (used after an ad, or when settings change mid-playback)
+  // also leaves the video alone if the playhead has moved on, since someone may have scrubbed.
+  function maybeResume(s, guarded = false) {
     if (!settings || !settings.enabled || s.closed || s.resumed || !s.ready || !s.saved || !s.video) return;
     const v = s.video;
     if (v.readyState < 1) return;
@@ -176,13 +183,15 @@
       watchForAdEnd(s);
       return;
     }
-    if (getVideoId() !== s.id || v.currentTime >= USER_MOVED_S || !isTrackable(v)) {
+    if (getVideoId() !== s.id || !isTrackable(v) || (guarded && v.currentTime >= USER_MOVED_S)) {
       stopResume(s);
       return;
     }
     const target = Math.max(0, s.saved.time - settings.rewind);
-    v.currentTime = target;
+    const differs = Math.abs(v.currentTime - target) > RESUME_TOLERANCE_S;
     stopResume(s);
+    if (!differs) return;
+    v.currentTime = target;
     if (target > 0) showToast(s, target);
   }
 
@@ -192,7 +201,7 @@
     const player = document.getElementById('movie_player');
     if (!player) return;
     s.observer = new MutationObserver(() => {
-      if (!isAd()) maybeResume(s);
+      if (!isAd()) maybeResume(s, true);
     });
     s.observer.observe(player, { attributes: true, attributeFilter: ['class'] });
   }
@@ -201,6 +210,8 @@
   function teardown(s) {
     hideToast();
     s.closed = true;
+    clearTimeout(s.timer);
+    s.timer = null;
     s.abort.abort();
     if (s.observer) s.observer.disconnect();
     s.observer = null;
@@ -214,6 +225,17 @@
     v.addEventListener('loadedmetadata', () => {
       s.ready = true;
       maybeResume(s);
+    }, opts);
+    // Fallback in case metadata fired before we attached, or YouTube positions the video late.
+    // Scheduled once, from the first non-ad 'playing'; the element holds the right video by then.
+    v.addEventListener('playing', () => {
+      if (s.recheckScheduled || s.resumed || isAd()) return;
+      s.recheckScheduled = true;
+      s.timer = setTimeout(() => {
+        s.timer = null;
+        s.ready = true;
+        maybeResume(s);
+      }, RESUME_RECHECK_MS);
     }, opts);
     // The <video> element is reused across SPA navigations, so on a navigation it may still hold
     // the previous video. Only trust it now if it looks freshly loaded; otherwise wait for loadedmetadata.
@@ -233,6 +255,11 @@
   }
 
   function init() {
+    // YouTube fires yt-navigate-finish on a page's first load, possibly after our own startup init().
+    // Same video, still-live session: keep it, or the toast would vanish and the check would rerun.
+    // (A real navigation always goes through yt-navigate-start first, which clears the session.)
+    const current = getVideoId();
+    if (session && !session.closed && current && session.id === current) return;
     if (session) teardown(session);
     session = null;
     lastKnown = null;
@@ -253,6 +280,8 @@
       resumed: false,
       saved: null,
       observer: null,
+      timer: null,
+      recheckScheduled: false,
       lastSaveAt: 0,
     };
     session = s;
@@ -288,8 +317,10 @@
 
   // ---- settings ----
   function applySettings(raw) {
+    const firstLoad = settings === null;
     settings = ytResumeNormalizeSettings(raw);
-    if (session) maybeResume(session); // may have been waiting for settings or for "enabled"
+    // Guarded after the first load: turning the extension on mid-playback must not yank the playhead.
+    if (session) maybeResume(session, !firstLoad);
     prune(); // runs on load and again after any change, e.g. a lower entry limit
   }
 
