@@ -1,0 +1,14 @@
+node_modules/
+
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Packaged builds
+*.zip
