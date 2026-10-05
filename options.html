@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YT Resume options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <h1>YT Resume options</h1>
+
+    <label class="row toggle">
+      <input id="enabled" type="checkbox">
+      <span>
+        <span class="label">Enabled</span>
+        <span class="hint">When off, nothing is saved and nothing is resumed. Saved videos are kept.</span>
+      </span>
+    </label>
+
+    <label class="row">
+      <span>
+        <span class="label">Minimum video length (seconds)</span>
+        <span class="hint">Videos shorter than this are not tracked. Default 60.</span>
+      </span>
+      <input id="minDuration" type="number" inputmode="numeric" step="1">
+    </label>
+
+    <label class="row">
+      <span>
+        <span class="label">Finished threshold (seconds)</span>
+        <span class="hint">A video this close to its end counts as finished and is forgotten. Default 15.</span>
+      </span>
+      <input id="finishedThreshold" type="number" inputmode="numeric" step="1">
+    </label>
+
+    <label class="row">
+      <span>
+        <span class="label">Maximum stored videos</span>
+        <span class="hint">The oldest entries are dropped beyond this. Default 500.</span>
+      </span>
+      <input id="maxEntries" type="number" inputmode="numeric" step="1">
+    </label>
+
+    <div class="actions">
+      <button id="reset" type="button">Reset to defaults</button>
+      <span id="status" role="status" aria-live="polite"></span>
+    </div>
+  </main>
+  <script src="settings.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

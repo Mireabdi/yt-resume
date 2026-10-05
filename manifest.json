@@ -3,11 +3,18 @@
   "name": "YT Resume",
   "version": "1.0.0",
   "description": "Remembers where you left off in YouTube videos and resumes playback.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "settings.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -24,5 +31,9 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   }
 }

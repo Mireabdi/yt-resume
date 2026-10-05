@@ -11,8 +11,12 @@
     <h1>YT Resume</h1>
     <button id="clear-all" type="button" hidden>Clear all</button>
   </header>
+  <div id="search-wrap" hidden>
+    <input id="search" type="search" placeholder="Search titles" aria-label="Search titles" autocomplete="off">
+  </div>
   <ul id="list"></ul>
   <p id="empty" hidden>Nothing saved yet. Watch a video for a bit and it will show up here.</p>
+  <p id="no-match" hidden>No saved videos match your search.</p>
   <script src="popup.js"></script>
 </body>
 </html>
