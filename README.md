@@ -17,7 +17,7 @@ The popup follows your system theme. Screenshots use sample data.
 
 - Resumes videos where you stopped, across reloads and restarts, including when you move between videos.
 - Waits out pre-roll ads before resuming.
-- A small "Resumed at 1:57" toast in the player's bottom-left for 6 s, with a **Start over** button that jumps to 0:00 and forgets the saved position.
+- A small "Resumed at 1:57" toast in the player's bottom-left for 6 s whenever a saved position applies, with a **Start over** button that jumps to 0:00 and forgets the saved position. It also shows when YouTube already resumed near the same spot.
 - Resumes a few seconds early (default 3 s, configurable) so you catch the context.
 - Popup with saved videos (thumbnail, title, channel, progress bar, time left), title search, and delete or clear all. Light and dark follow your system theme.
 - Playlist aware: videos watched in a playlist reopen in it.
@@ -49,7 +49,7 @@ Right-click the toolbar icon and choose **Options**. Changes apply immediately, 
 
 - **Content script** (`content.js`) runs on `youtube.com`, tracks the main `<video>` on pages with a `v` parameter, and needs no background worker.
 - **Storage:** positions are kept in `chrome.storage.local` as `v:<videoId>` with time, duration, title, channel and playlist. Writes happen at most every 5 s while playing, and on pause, tab hidden and page close. Entries older than 90 days are pruned, and the newest are kept up to your maximum. Settings are stored under `settings`, and open tabs pick up changes through `storage.onChanged`.
-- **Resuming:** once per video load, it compares the playhead with the saved position (minus the rewind, never below 0:00) and seeks only if they are more than 5 s apart. That also overrides YouTube's own watch-history resume when it picks a different spot. Nothing happens if the saved position is 10 s or less, the URL has a `t` parameter, or the playhead is already within 5 s of the target. The toast is built with DOM APIs and styled by `toast.css` under a `ytr-` class prefix, and is never shown over an ad.
+- **Resuming:** once per video load, it compares the playhead with the saved position (minus the rewind, never below 0:00). If they are more than 5 s apart it seeks to the target, which overrides YouTube's own watch-history resume when that picked a different spot. If the playhead is already within 5 s it doesn't seek. Either way the toast shows, with the time you resumed at. Nothing happens if the saved position is 10 s or less, the URL has a `t` parameter, the extension is off, or an ad is playing (the toast appears once the ad ends). The toast is built with DOM APIs and styled by `toast.css` under a `ytr-` class prefix, and is never shown over an ad.
 - **SPA navigation:** YouTube doesn't reload between videos, so it saves the outgoing video on `yt-navigate-start` and sets up the new one on `yt-navigate-finish`.
 - **Ads:** nothing is saved or seeked while `#movie_player` has `ad-showing`. After a pre-roll, a `MutationObserver` resumes once the ad ends.
 

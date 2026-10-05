@@ -179,8 +179,10 @@
 
   // One check per video load. At load time YouTube may already have resumed from its own history,
   // so we compare the playhead with our target instead of assuming it starts at 0:00 and only
-  // seek when they disagree. `guarded` (used after an ad, or when settings change mid-playback)
-  // also leaves the video alone if the playhead has moved on, since someone may have scrubbed.
+  // seek when they disagree. Either way a saved position was applied, so the toast always shows
+  // (with the playhead's time if we didn't need to seek). `guarded` (used after an ad, or when
+  // settings change mid-playback) also leaves the video alone if the playhead has moved on,
+  // since someone may have scrubbed.
   function maybeResume(s, guarded = false) {
     if (!settings || !settings.enabled || s.closed || s.resumed || !s.ready || !s.saved || !s.video) return;
     const v = s.video;
@@ -196,9 +198,9 @@
     const target = Math.max(0, s.saved.time - settings.rewind);
     const differs = Math.abs(v.currentTime - target) > RESUME_TOLERANCE_S;
     stopResume(s);
-    if (!differs) return;
-    v.currentTime = target;
-    if (target > 0) showToast(s, target);
+    if (differs) v.currentTime = target;
+    const resumedAt = differs ? target : v.currentTime;
+    if (resumedAt > 0) showToast(s, resumedAt); // nothing to announce when we're at 0:00
   }
 
   // A pre-roll ad can be playing when metadata loads; retry once the ad class clears.
