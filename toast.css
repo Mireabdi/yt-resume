@@ -1,0 +1,40 @@
+/* Resume toast. Everything is prefixed "ytr-" to stay clear of YouTube's own classes. */
+.ytr-toast {
+  position: absolute;
+  left: 12px;
+  bottom: 64px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(28, 28, 30, 0.92);
+  color: #fff;
+  font: 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+}
+
+.ytr-toast__btn {
+  margin: 0;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #8ab4f8;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ytr-toast__btn:hover { background: rgba(255, 255, 255, 0.12); }
+
+.ytr-toast__btn:focus-visible {
+  outline: 2px solid #8ab4f8;
+  outline-offset: 1px;
+}
+
+/* Never show over an ad, even for the instant before the script notices. */
+#movie_player.ad-showing .ytr-toast { display: none !important; }

@@ -7,9 +7,11 @@
   const MIN_RESUME_S = 10; // saved positions at or below this are not worth resuming
   const USER_MOVED_S = 5; // playhead beyond this at resume time means someone already moved it
   const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+  const TOAST_MS = 6000;
 
   let session = null; // state for the video currently being tracked
   let lastKnown = null; // {id, list, time, title, channel, duration}; used when the URL has already changed
+  let toast = null; // {el, timer} for the "Resumed at" overlay, at most one at a time
   let isFirstInit = true;
   let settings = null; // null until loaded from storage, so nothing happens under stale defaults
 
@@ -34,6 +36,14 @@
   async function storageRemove(keys) {
     if (!hasStorage()) return;
     try { await chrome.storage.local.remove(keys); } catch { /* ignore */ }
+  }
+
+  function formatTime(total) {
+    const s = Math.max(0, Math.floor(total));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = String(s % 60).padStart(2, '0');
+    return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
   }
 
   // ---- saving ----
@@ -96,11 +106,56 @@
   }
 
   function onTimeUpdate(s) {
+    if (toast && isAd()) hideToast(); // e.g. a mid-roll starting while the toast is still up
     if (!capture(s)) return;
     const now = Date.now();
     if (now - s.lastSaveAt < SAVE_INTERVAL_MS) return;
     s.lastSaveAt = now;
     save();
+  }
+
+  // ---- resume toast ----
+  function hideToast() {
+    if (!toast) return;
+    clearTimeout(toast.timer);
+    toast.el.remove();
+    toast = null;
+  }
+
+  function startOver(s) {
+    hideToast();
+    if (s.closed || !s.video) return;
+    s.video.currentTime = 0;
+    // lastKnown still holds the resumed position; drop it so a quick navigation can't write it back.
+    if (lastKnown && lastKnown.id === s.id) lastKnown = null;
+    storageRemove(KEY_PREFIX + s.id);
+  }
+
+  // Classes are prefixed "ytr-" and styled in toast.css so they can't clash with YouTube's CSS.
+  function showToast(s, resumedAt) {
+    hideToast();
+    try {
+      const player = document.getElementById('movie_player');
+      if (!player || isAd()) return;
+      const el = document.createElement('div');
+      el.className = 'ytr-toast';
+      el.setAttribute('role', 'status');
+      const text = document.createElement('span');
+      text.className = 'ytr-toast__text';
+      text.textContent = `Resumed at ${formatTime(resumedAt)}`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ytr-toast__btn';
+      btn.textContent = 'Start over';
+      btn.addEventListener('click', () => startOver(s));
+      // Keep clicks from reaching the player, which would pause or unpause the video.
+      for (const type of ['click', 'dblclick', 'mousedown', 'pointerdown']) {
+        el.addEventListener(type, (e) => e.stopPropagation());
+      }
+      el.append(text, btn);
+      player.append(el);
+      toast = { el, timer: setTimeout(hideToast, TOAST_MS) };
+    } catch { /* the toast is a nicety; never break resuming over it */ }
   }
 
   // ---- resuming ----
@@ -125,8 +180,10 @@
       stopResume(s);
       return;
     }
-    v.currentTime = s.saved.time;
+    const target = Math.max(0, s.saved.time - settings.rewind);
+    v.currentTime = target;
     stopResume(s);
+    if (target > 0) showToast(s, target);
   }
 
   // A pre-roll ad can be playing when metadata loads; retry once the ad class clears.
@@ -142,6 +199,7 @@
 
   // ---- session lifecycle ----
   function teardown(s) {
+    hideToast();
     s.closed = true;
     s.abort.abort();
     if (s.observer) s.observer.disconnect();

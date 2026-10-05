@@ -30,6 +30,21 @@ function watchUrl(id, entry) {
   return url;
 }
 
+// Small fixed-size thumbnail; if it can't load, the grey placeholder box stays and nothing shifts.
+function renderThumb(id) {
+  const wrap = el('span', 'thumb');
+  const img = document.createElement('img');
+  img.width = 80;
+  img.height = 45;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.referrerPolicy = 'no-referrer';
+  img.addEventListener('error', () => { img.hidden = true; });
+  img.src = `https://i.ytimg.com/vi/${encodeURIComponent(id)}/default.jpg`;
+  wrap.append(img);
+  return wrap;
+}
+
 function renderRow([key, entry]) {
   const id = key.slice(KEY_PREFIX.length);
   const pct = entry.duration > 0 ? Math.min(100, (entry.time / entry.duration) * 100) : 0;
@@ -38,14 +53,16 @@ function renderRow([key, entry]) {
   const open = el('button', 'open');
   open.type = 'button';
   open.title = title;
-  open.append(el('span', 'title', title));
-  if (entry.channel) open.append(el('span', 'channel', String(entry.channel)));
-  open.append(el('span', 'meta', `${formatTime(entry.time)} / ${formatTime(entry.duration)}`));
+  const text = el('span', 'text');
+  text.append(el('span', 'title', title));
+  if (entry.channel) text.append(el('span', 'channel', String(entry.channel)));
+  text.append(el('span', 'meta', `${formatTime(entry.time)} / ${formatTime(entry.duration)}`));
   const bar = el('div', 'bar');
   const fill = el('div', 'fill');
   fill.style.width = `${pct}%`;
   bar.append(fill);
-  open.append(bar);
+  text.append(bar);
+  open.append(renderThumb(id), text);
   open.addEventListener('click', () => {
     chrome.tabs.create({ url: watchUrl(id, entry) });
   });

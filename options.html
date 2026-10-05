@@ -42,6 +42,14 @@
       <input id="maxEntries" type="number" inputmode="numeric" step="1">
     </label>
 
+    <label class="row">
+      <span>
+        <span class="label">Rewind on resume (seconds)</span>
+        <span class="hint">Resume this many seconds before where you stopped, to catch up on context. 0 to 30. Default 3.</span>
+      </span>
+      <input id="rewind" type="number" inputmode="numeric" step="1">
+    </label>
+
     <div class="actions">
       <button id="reset" type="button">Reset to defaults</button>
       <span id="status" role="status" aria-live="polite"></span>

@@ -15,7 +15,10 @@
         "settings.js",
         "content.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "css": [
+        "toast.css"
+      ]
     }
   ],
   "action": {

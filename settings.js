@@ -6,6 +6,7 @@ const YT_RESUME_DEFAULTS = Object.freeze({
   minDuration: 60, // seconds; shorter videos are not tracked
   finishedThreshold: 15, // seconds from the end that counts as finished
   maxEntries: 500,
+  rewind: 3, // seconds subtracted from the saved time when resuming
 });
 
 // Upper bounds keep a typo from disabling tracking or filling storage.
@@ -13,6 +14,7 @@ const YT_RESUME_LIMITS = Object.freeze({
   minDuration: { min: 0, max: 86400 },
   finishedThreshold: { min: 0, max: 86400 },
   maxEntries: { min: 1, max: 5000 },
+  rewind: { min: 0, max: 30 },
 });
 
 // Turns whatever is in storage (or a form) into a complete, valid settings object.
@@ -31,5 +33,6 @@ function ytResumeNormalizeSettings(raw) {
     minDuration: num('minDuration'),
     finishedThreshold: num('finishedThreshold'),
     maxEntries: num('maxEntries'),
+    rewind: num('rewind'),
   };
 }

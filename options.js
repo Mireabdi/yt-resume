@@ -3,13 +3,14 @@ const fields = {
   minDuration: document.getElementById('minDuration'),
   finishedThreshold: document.getElementById('finishedThreshold'),
   maxEntries: document.getElementById('maxEntries'),
+  rewind: document.getElementById('rewind'),
 };
 const statusEl = document.getElementById('status');
 let statusTimer = null;
 
 function fill(s) {
   fields.enabled.checked = s.enabled;
-  for (const name of ['minDuration', 'finishedThreshold', 'maxEntries']) {
+  for (const name of ['minDuration', 'finishedThreshold', 'maxEntries', 'rewind']) {
     fields[name].value = s[name];
     fields[name].min = YT_RESUME_LIMITS[name].min;
     fields[name].max = YT_RESUME_LIMITS[name].max;
@@ -29,6 +30,7 @@ async function save() {
     minDuration: fields.minDuration.value,
     finishedThreshold: fields.finishedThreshold.value,
     maxEntries: fields.maxEntries.value,
+    rewind: fields.rewind.value,
   });
   fill(s); // shows the value that was actually stored (clamped, or the default if blank)
   await chrome.storage.local.set({ [YT_RESUME_SETTINGS_KEY]: s });

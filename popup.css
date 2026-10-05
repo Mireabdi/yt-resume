@@ -95,6 +95,9 @@ li {
 }
 
 .open {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex: 1;
   min-width: 0;
   padding: 10px 14px;
@@ -104,6 +107,28 @@ li {
 }
 
 .open:hover { background: var(--hover); }
+
+.thumb {
+  flex: none;
+  width: 80px;
+  height: 45px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--track);
+}
+
+/* default.jpg is 4:3 with black bars; cover crops it to the 16:9 box. */
+.thumb img {
+  display: block;
+  width: 80px;
+  height: 45px;
+  object-fit: cover;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
 
 .title {
   display: block;
