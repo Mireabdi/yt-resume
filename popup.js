@@ -130,4 +130,14 @@ clearBtn.addEventListener('click', async () => {
   load();
 });
 
-load();
+const initialLoad = load();
+
+// Chrome popups can ignore autofocus, so focus explicitly once the list has rendered.
+// The search box stays hidden when nothing is saved, and a hidden input can't take focus.
+document.addEventListener('DOMContentLoaded', () => {
+  initialLoad.then(() => {
+    requestAnimationFrame(() => {
+      if (!searchWrap.hidden) searchEl.focus();
+    });
+  });
+});
